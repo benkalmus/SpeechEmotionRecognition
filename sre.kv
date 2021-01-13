@@ -1,0 +1,323 @@
+<StartPage>:    
+    GridLayout:
+        cols: 1
+        padding: 10
+        spacing: 10
+        size: root.size
+        #row_default_height: 50
+        height: self.minimum_height
+        #row_force_default: True
+        
+        Label:
+            text:"Speech Emotion Recognition"
+        GridLayout:
+            cols: 2
+            spacing: 10
+            Label:
+                valign: 'top'
+                size: self.texture_size
+                text: "List of datasets available."
+            Label:
+                valign: 'top'
+                size: self.texture_size
+                text: "Select Neural Network model for predictions."
+            Spinner:
+                id: datasetDropList
+                size: 100, 44
+                pos_hint: {'center': (.5, .5)}
+                text: '< SHOW >'
+                values: root.DATASETS
+            Spinner:
+                id: modelDropList
+                size: 100, 44
+                pos_hint: {'center': (.5, .5)}
+                text: '< SELECT >'
+                values: root.NN_MODELS
+                on_text: root.modelChanged(modelDropList, modelDropList.text)
+                
+        Label:
+            text: "Pushing the green microphone button will activate your microphone. Selected neural network model will try to guess emotion in your voice. Each model is trained on a specific dataset.\nIf you wish, you may select the emotion for your audio clip and save it for later training. You can train and tweak your own model in the 'Training Screen' using your own data or from datasets installed."
+            text_size: self.width-20, self.height-10
+            valign: 'top'
+            size: self.texture_size
+        GridLayout:
+            cols:3
+            Label:
+                size_hint: .2, 1 
+                text: "Audio clip length"
+            Slider:
+                id: recordLengthSlider
+                min:2
+                max:5
+                value:3
+                value_track:True
+                value_track_color: [0.2, 0, 0.8, 1]
+                on_value: root.sliderUpdateLabelValue()
+            Label:
+                id: recordLengthLabel
+                size_hint: .2, 1 
+                text: "3.0 seconds"
+        
+        GridLayout:
+            rows:1
+            cols:3
+            Label:
+                size_hint: 1, 1
+            Button:
+                id: recordBtn
+                text: ""
+                #size_hint: None, 1
+                pos_hint:  {'center_x': 0.5, 'center_y': 0.5}
+                size_hint: None, None
+                on_release: root.recordBtnPress(recordBtn)
+                background_normal: 'icn/mic_green.png'
+                background_down: 'icn/mic_green.png'
+            Label:
+                size_hint: 1, 1
+        Label:
+            id: recordTranscript
+            text: "Transcript"
+            text_size: self.size
+            valign: 'top'
+            halign: 'left'
+        Label:
+            id: recordResultLabel
+            text: "Results:"
+            text_size: self.size
+            valign: 'top'
+            halign: 'left'
+        GridLayout:
+            cols:2
+            size: [100,200]
+            spacing: 10
+            Spinner:
+                id: emotionDropList
+                size: 100, 44
+                text: "< Select Emotion if the prediction is wrong >"
+                values: root.emotionsList
+            Button:
+                id: saveClipBtn
+                text: "Save Audio clip to Custom user dataset"
+                on_release: root.saveClipBtnPress(saveClipBtn)
+        GridLayout:
+            cols:3
+            Label:
+            Button:
+                id: retrainBtn
+                text:""
+                on_release: root.retrainBtnPress(retrainBtn)
+                background_normal: 'icn/trainscreen.png'
+                background_down: 'icn/trainscreen.png'
+                size_hint: None, None
+                pos_hint:  {'center_x': 0.5, 'center_y': 0.5}
+            Label:
+                
+<TrainPage>:
+    GridLayout:
+        padding: 10
+        spacing: 10
+        size: root.width, root.height
+        cols: 1
+        Label:
+            text: "Neural Model Training Screen"
+        Button:
+            id: returnBtn
+            text: "Return to main menu"
+            size_hint: .5, .5
+            on_release: root.returnBtnPress(returnBtn)
+        GridLayout:
+            cols:2
+            spacing: 10
+            Label:
+                text:"Dataset"
+                text_size: self.size
+                valign: "center"
+                halign: "center"
+                size_hint: .7, 1
+            Spinner:
+                id: datasetTrainList
+                size: 100, 44
+                pos_hint: {'center': (.5, .5)}
+                text: '< SELECT >'
+                values: root.DATASETS
+        GridLayout:
+            cols: 3
+            spacing: 10
+            Label:
+                text:"Test train split"
+                #text_size: root.width, None
+                #size: self.texture_size
+                halign: 'left'
+                valign: 'middle'
+            Slider:
+                id: dataSplitSlider
+                min:0.05
+                max:0.95
+                value:0.20
+                value_track:True
+                value_track_color: [0.2, 0, 0.8, 1]
+                on_value: dataSplitLabel.text = str(round(dataSplitSlider.value,2))
+            Label:
+                id:dataSplitLabel
+                text: str(dataSplitSlider.value)
+                size_hint: .4, 1
+        GridLayout:
+            cols: 3
+            Label:
+                text:"Batch size"
+            Slider:
+                id: batchSlider
+                min:2
+                max:500
+                value:64
+                value_track:True
+                value_track_color: [0.2, 0, 0.8, 1]
+                on_value: batchLabel.text = str(round(batchSlider.value))
+            Label:
+                id: batchLabel
+                text: str(batchSlider.value)
+                size_hint: .4, 1
+        GridLayout:
+            cols: 3
+            Label:
+                text:"Training epochs"
+            Slider:
+                id: epochSlider
+                min:1
+                max:1000
+                value:20
+                value_track:True
+                value_track_color: [0.2, 0, 0.8, 1]
+                on_value: epochLabel.text = str(round(epochSlider.value))
+            Label:
+                id: epochLabel
+                text: str(epochSlider.value)
+                size_hint: .4, 1
+        GridLayout:
+            cols: 2
+            Label:
+                text:"Activation Function\nAll valid keras functions accepted e.g tanh, relu, sigmoid"
+                text_size: self.size
+                size_hint: .75, 1
+                valign: "center"
+                halign: "center"
+            TextInput:
+                id: activationFuncInput
+                text: "tanh"
+        GridLayout:
+            cols: 3
+            Label:
+                text:"Learning Rate"
+            Slider:
+                id: lrSlider
+                min:1e-8
+                max:1e-4
+                value:2e-5
+                value_track:True
+                value_track_color: [0.2, 0, 0.8, 1]
+                on_value: lrLabel.text = str(lrSlider.value)
+            Label:
+                id: lrLabel
+                text: str(lrSlider.value)
+                size_hint: .4, 1
+        GridLayout:
+            cols: 3
+            Label:
+                text:"Layer 1 -Convolutional- Cells"
+            Slider:
+                id: layer1Slider
+                min:20
+                max:600
+                value:300
+                value_track:True
+                value_track_color: [0.2, 0, 0.8, 1]
+                on_value: layer1Label.text = str(round(layer1Slider.value))
+            Label:
+                id: layer1Label
+                text: str(round(layer1Slider.value))
+                size_hint: .4, 1
+        GridLayout:
+            cols: 3
+            Label:
+                text:"Layer 2 -Convolutional- Cells"
+            Slider:
+                id: layer2Slider
+                min:20
+                max:600
+                value:150
+                value_track:True
+                value_track_color: [0.2, 0, 0.8, 1]
+                on_value: layer2Label.text = str(round(layer2Slider.value))
+            Label:
+                id: layer2Label
+                text: str(round(layer2Slider.value))
+                size_hint: .4, 1
+        GridLayout:
+            cols: 3
+            Label:
+                text:"Layer 3 -Dense- Cells"
+            Slider:
+                id: layer3Slider
+                min:20
+                max:600
+                value:100
+                value_track:True
+                value_track_color: [0.2, 0, 0.8, 1]
+                on_value: layer3Label.text = str(round(layer3Slider.value))
+            Label:
+                id: layer3Label
+                text: str(round(layer3Slider.value))
+                size_hint: .4, 1
+        GridLayout:
+            cols: 2
+            Label:
+                text:"Neural Network Model name"
+                text_size: self.size
+                size_hint: .75, 1
+                valign: "center"
+                halign: "center"
+            TextInput:
+                id: modelNameInput
+                text: ""
+        GridLayout:
+            rows:1
+            cols:3
+            Label:
+                text: "Train and save"
+                size_hint: .92, 1
+            Button:
+                id: trainBtn
+                text: ""
+                size_hint: None, None
+                background_normal: "icn\\save_blue.png"
+                background_down: "icn\\save_blue.png"
+                on_release: root.trainBtnPress()
+            Label:
+        Label:
+            id: trainLabel
+            text: ""
+            text_size: self.size
+            valign: "center"
+            halign: "left"
+            
+         
+<PopUp>:
+    id: pop
+    title: "Warning"
+    size_hint: 0.5, 0.5
+    on_open:
+        popupText.text = root.Text
+    GridLayout:
+        cols: 1
+        Label:
+            id: popupText
+            size: self.texture_size
+            size_hint: 0.6, 0.2
+            pos_hint: {"x":0.2, "top":0.1}
+            text_size: self.width*0.8, self.height*0.5
+    
+        Button:
+            text: "Okay"
+            size_hint: 0.8, 0.05
+            pos_hint: {"x":0.1, "y":0.1}
+            on_press: pop.dismiss()
